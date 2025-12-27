@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced 3D Portfolio</title>
+
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p>Loading your portfolio experience...</p>
+    </div>
+
+    <div id="canvas-container"></div>
+    <canvas id="minimap"></canvas>
+
+    <div id="ui-overlay">
+        <div id="instructions">
+            <h3>Controls</h3>
+            <div id="instruction-content">
+                <p>⬆️ W / ↑ - Move Forward</p>
+                <p>⬇️ S / ↓ - Move Backward</p>
+                <p>⬅️ A / ← - Turn Left</p>
+                <p>➡️ D / → - Turn Right</p>
+                <p>🖱️ Orbit Mode: Drag to rotate view</p>
+                <p>🎵 Toggle music anytime</p>
+            </div>
+            <button id="toggle-instructions">Hide</button>
+        </div>
+
+        <div id="view-controls">
+            <button class="view-btn active" data-mode="walk">🚶 Walk Mode</button>
+            <button class="view-btn" data-mode="orbit">🔄 Orbit Mode</button>
+        </div>
+
+        <div id="time-controls">
+            <button class="time-btn" id="toggle-time">🌙 Night Mode</button>
+        </div>
+
+        <div id="music-controls">
+            <button class="music-btn" id="toggle-music">
+                <span id="music-icon">🔇</span>
+                <span id="music-text">Play Music</span>
+            </button>
+        </div>
+
+        <div id="interaction-prompt">Click to View</div>
+
+        <div id="billboard-modal">
+            <button id="close-modal">×</button>
+            <div id="modal-content"></div>
+        </div>
+
+        <div id="mobile-controls">
+            <div class="control-btn" data-key="a">↺</div>
+            <div class="control-btn" data-key="w">↑</div>
+            <div class="control-btn" data-key="s">↓</div>
+            <div class="control-btn" data-key="d">↻</div>
+        </div>
+    </div>
+
+
+
+</body>
+</html>
