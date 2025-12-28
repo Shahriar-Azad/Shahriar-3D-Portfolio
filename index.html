@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced 3D Portfolio</title>
+    <title>Ultimate 3D Portfolio</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
             background: #000;
         }
@@ -38,32 +38,42 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 15px 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 14px;
             pointer-events: auto;
-            max-width: 250px;
+            max-width: 280px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(76, 175, 80, 0.3);
         }
 
         #instructions h3 {
             margin-bottom: 10px;
             color: #4CAF50;
+            font-size: 18px;
         }
 
         #instructions p {
             margin: 5px 0;
+            font-size: 13px;
         }
 
         #toggle-instructions {
             margin-top: 10px;
-            padding: 5px 10px;
-            background: #4CAF50;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             color: white;
             cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        #toggle-instructions:hover {
+            transform: scale(1.05);
         }
 
         /* View Mode Toggle */
@@ -77,28 +87,30 @@
         }
 
         .view-btn {
-            padding: 10px 20px;
-            background: rgba(76, 175, 80, 0.8);
+            padding: 12px 24px;
+            background: rgba(76, 175, 80, 0.85);
             border: 2px solid #4CAF50;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            backdrop-filter: blur(5px);
         }
 
         .view-btn:hover {
             background: rgba(76, 175, 80, 1);
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
         }
 
         .view-btn.active {
-            background: #4CAF50;
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            box-shadow: 0 0 25px rgba(76, 175, 80, 0.6);
         }
 
-        /* Day/Night Toggle */
-        #time-controls {
+        /* Time & Quality Controls */
+        #bottom-controls {
             position: absolute;
             bottom: 20px;
             right: 20px;
@@ -107,24 +119,40 @@
             pointer-events: auto;
         }
 
-        .time-btn {
-            padding: 10px 20px;
-            background: rgba(255, 152, 0, 0.8);
-            border: 2px solid #FF9800;
-            border-radius: 8px;
+        .control-btn-bottom {
+            padding: 12px 24px;
+            border: 2px solid;
+            border-radius: 10px;
             color: white;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            backdrop-filter: blur(5px);
         }
 
-        .time-btn:hover {
+        #toggle-time {
+            background: rgba(255, 152, 0, 0.85);
+            border-color: #FF9800;
+        }
+
+        #toggle-time:hover {
             background: rgba(255, 152, 0, 1);
+            transform: translateY(-2px);
         }
 
-        .time-btn.night {
-            background: rgba(63, 81, 181, 0.8);
+        #toggle-time.night {
+            background: rgba(63, 81, 181, 0.85);
             border-color: #3F51B5;
+        }
+
+        #toggle-particles {
+            background: rgba(156, 39, 176, 0.85);
+            border-color: #9C27B0;
+        }
+
+        #toggle-particles:hover {
+            background: rgba(156, 39, 176, 1);
+            transform: translateY(-2px);
         }
 
         /* Music Controls */
@@ -136,21 +164,24 @@
         }
 
         .music-btn {
-            padding: 10px 20px;
-            background: rgba(156, 39, 176, 0.8);
-            border: 2px solid #9C27B0;
-            border-radius: 8px;
+            padding: 12px 24px;
+            background: rgba(233, 30, 99, 0.85);
+            border: 2px solid #E91E63;
+            border-radius: 10px;
             color: white;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            backdrop-filter: blur(5px);
         }
 
         .music-btn:hover {
-            background: rgba(156, 39, 176, 1);
+            background: rgba(233, 30, 99, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
         }
 
         /* Interaction Prompt */
@@ -159,41 +190,43 @@
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(76, 175, 80, 0.9);
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
+            padding: 16px 32px;
+            border-radius: 30px;
             font-size: 16px;
             font-weight: bold;
             display: none;
             pointer-events: auto;
             cursor: pointer;
             animation: pulse 2s infinite;
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.5);
         }
 
         @keyframes pulse {
             0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.05); }
+            50% { transform: translateX(-50%) scale(1.08); }
         }
 
-        /* Billboard Content Modal */
+        /* Billboard Modal */
         #billboard-modal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            width: 80%;
-            max-width: 800px;
-            max-height: 80vh;
-            background: rgba(20, 20, 30, 0.95);
-            border: 2px solid #4CAF50;
-            border-radius: 15px;
-            padding: 30px;
+            width: 85%;
+            max-width: 850px;
+            max-height: 85vh;
+            background: rgba(15, 15, 25, 0.97);
+            border: 3px solid #4CAF50;
+            border-radius: 20px;
+            padding: 35px;
             color: white;
             overflow-y: auto;
             pointer-events: auto;
-            transition: transform 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
         }
 
         #billboard-modal.active {
@@ -203,40 +236,45 @@
         #billboard-modal h2 {
             color: #4CAF50;
             margin-bottom: 20px;
-            font-size: 28px;
+            font-size: 32px;
+            text-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
         }
 
         #billboard-modal p {
-            line-height: 1.6;
+            line-height: 1.8;
             margin-bottom: 15px;
+            font-size: 16px;
         }
 
         #billboard-modal ul {
-            margin-left: 20px;
+            margin-left: 25px;
             margin-bottom: 15px;
         }
 
         #billboard-modal li {
-            margin: 8px 0;
+            margin: 10px 0;
+            line-height: 1.6;
         }
 
         #close-modal {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #f44336;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #f44336, #d32f2f);
             color: white;
             border: none;
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3);
         }
 
         #close-modal:hover {
-            background: #d32f2f;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            transform: rotate(90deg);
         }
 
         /* Loading Screen */
@@ -253,7 +291,7 @@
             align-items: center;
             color: white;
             z-index: 1000;
-            transition: opacity 0.5s;
+            transition: opacity 0.8s;
         }
 
         #loading-screen.hidden {
@@ -262,13 +300,13 @@
         }
 
         .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top: 5px solid white;
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            border-top: 6px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         @keyframes spin {
@@ -276,14 +314,25 @@
             100% { transform: rotate(360deg); }
         }
 
+        #loading-text {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
         /* Mobile Controls */
         #mobile-controls {
             position: absolute;
-            bottom: 80px;
+            bottom: 90px;
             left: 50%;
             transform: translateX(-50%);
             display: none;
-            gap: 10px;
+            gap: 12px;
             pointer-events: auto;
         }
 
@@ -294,43 +343,84 @@
         }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(76, 175, 80, 0.7);
-            border: 2px solid #4CAF50;
+            width: 65px;
+            height: 65px;
+            background: rgba(76, 175, 80, 0.8);
+            border: 3px solid #4CAF50;
             border-radius: 50%;
             color: white;
-            font-size: 24px;
+            font-size: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             user-select: none;
             touch-action: none;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
         }
 
         .control-btn:active {
-            background: rgba(76, 175, 80, 0.9);
+            background: rgba(76, 175, 80, 1);
+            transform: scale(0.95);
         }
 
         /* Minimap */
         #minimap {
             position: absolute;
             top: 20px;
-            right: 280px;
-            width: 200px;
-            height: 200px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
+            right: 320px;
+            width: 220px;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #4CAF50;
+            border-radius: 12px;
             pointer-events: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* FPS Counter */
+        #fps-counter {
+            position: absolute;
+            top: 250px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4CAF50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        /* Scrollbar Styling */
+        #billboard-modal::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #billboard-modal::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        #billboard-modal::-webkit-scrollbar-thumb {
+            background: #4CAF50;
+            border-radius: 10px;
+        }
+
+        #billboard-modal::-webkit-scrollbar-thumb:hover {
+            background: #45a049;
         }
     </style>
 </head>
 <body>
     <div id="loading-screen">
         <div class="loader"></div>
-        <p>Loading your portfolio experience...</p>
+        <p id="loading-text">Loading your portfolio experience...</p>
+        <p id="loading-subtext">Preparing 3D environment, characters, and interactive elements</p>
     </div>
 
     <div id="canvas-container"></div>
@@ -338,14 +428,15 @@
 
     <div id="ui-overlay">
         <div id="instructions">
-            <h3>Controls</h3>
+            <h3>🎮 Controls</h3>
             <div id="instruction-content">
                 <p>⬆️ W / ↑ - Move Forward</p>
                 <p>⬇️ S / ↓ - Move Backward</p>
                 <p>⬅️ A / ← - Turn Left</p>
                 <p>➡️ D / → - Turn Right</p>
-                <p>🖱️ Orbit Mode: Drag to rotate view</p>
-                <p>🎵 Toggle music anytime</p>
+                <p>🖱️ Orbit Mode: Drag to rotate</p>
+                <p>🎵 Toggle music & effects</p>
+                <p>✨ Explore billboards for projects!</p>
             </div>
             <button id="toggle-instructions">Hide</button>
         </div>
@@ -355,8 +446,9 @@
             <button class="view-btn" data-mode="orbit">🔄 Orbit Mode</button>
         </div>
 
-        <div id="time-controls">
-            <button class="time-btn" id="toggle-time">🌙 Night Mode</button>
+        <div id="bottom-controls">
+            <button class="control-btn-bottom" id="toggle-time">🌙 Night Mode</button>
+            <button class="control-btn-bottom" id="toggle-particles">✨ Particles</button>
         </div>
 
         <div id="music-controls">
@@ -366,7 +458,9 @@
             </button>
         </div>
 
-        <div id="interaction-prompt">Click to View</div>
+        <div id="fps-counter">FPS: <span id="fps-value">60</span></div>
+
+        <div id="interaction-prompt">🎯 Click to View</div>
 
         <div id="billboard-modal">
             <button id="close-modal">×</button>
@@ -381,977 +475,7 @@
         </div>
     </div>
 
-<script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js';
-        // Scene Setup
-        const scene = new THREE.Scene();
-        let currentSkyColor = 0x87ceeb;
-        scene.background = new THREE.Color(currentSkyColor);
-        scene.fog = new THREE.Fog(currentSkyColor, 0, 100);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        // Lighting System
-        const lights = {
-            ambient: null,
-            sun: null,
-            moon: null
-        };
-
-        lights.ambient = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(lights.ambient);
-
-        lights.sun = new THREE.DirectionalLight(0xfff5e1, 0.8);
-        lights.sun.position.set(10, 20, 10);
-        lights.sun.castShadow = true;
-        lights.sun.shadow.camera.left = -50;
-        lights.sun.shadow.camera.right = 50;
-        lights.sun.shadow.camera.top = 50;
-        lights.sun.shadow.camera.bottom = -50;
-        lights.sun.shadow.mapSize.width = 2048;
-        lights.sun.shadow.mapSize.height = 2048;
-        scene.add(lights.sun);
-
-        // Moon light (initially invisible)
-        lights.moon = new THREE.DirectionalLight(0x6b7c9e, 0);
-        lights.moon.position.set(-10, 20, -10);
-        lights.moon.castShadow = true;
-        scene.add(lights.moon);
-
-        // Stars for night mode
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 0.1,
-            transparent: true,
-            opacity: 0
-        });
-
-        const starsVertices = [];
-        for (let i = 0; i < 1000; i++) {
-            const x = (Math.random() - 0.5) * 200;
-            const y = Math.random() * 100 + 20;
-            const z = (Math.random() - 0.5) * 200;
-            starsVertices.push(x, y, z);
-        }
-
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
-
-        // Ground with better texture
-        const groundGeometry = new THREE.PlaneGeometry(100, 100, 50, 50);
-        const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x3a7a3a,
-            roughness: 0.8,
-            metalness: 0.2
-        });
-        
-        // Add some terrain variation
-        const positions = groundGeometry.attributes.position;
-        for (let i = 0; i < positions.count; i++) {
-            const x = positions.getX(i);
-            const z = positions.getZ(i);
-            const height = Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.3;
-            positions.setY(i, height);
-        }
-        groundGeometry.computeVertexNormals();
-
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Grid helper
-        const gridHelper = new THREE.GridHelper(100, 50, 0x000000, 0x2a5a2a);
-        gridHelper.position.y = 0.01;
-        scene.add(gridHelper);
-
-        // ENHANCED CHARACTER with better design
-        function createCharacter() {
-            const character = new THREE.Group();
-            
-            // Body (torso)
-            const bodyGeometry = new THREE.CylinderGeometry(0.4, 0.5, 1.2, 8);
-            const bodyMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x2196F3,
-                roughness: 0.7,
-                metalness: 0.3
-            });
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.position.y = 0.6;
-            body.castShadow = true;
-            character.add(body);
-
-            // Head
-            const headGeometry = new THREE.SphereGeometry(0.35, 16, 16);
-            const headMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0xffdbac,
-                roughness: 0.8
-            });
-            const head = new THREE.Mesh(headGeometry, headMaterial);
-            head.position.y = 1.5;
-            head.castShadow = true;
-            character.add(head);
-
-            // Eyes
-            const eyeGeometry = new THREE.SphereGeometry(0.08, 8, 8);
-            const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
-            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-            leftEye.position.set(-0.12, 1.55, 0.3);
-            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-            rightEye.position.set(0.12, 1.55, 0.3);
-            character.add(leftEye);
-            character.add(rightEye);
-
-            // Hat/cap
-            const hatGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.2, 8);
-            const hatMaterial = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
-            const hat = new THREE.Mesh(hatGeometry, hatMaterial);
-            hat.position.y = 1.8;
-            hat.castShadow = true;
-            character.add(hat);
-
-            const hatBrimGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.05, 8);
-            const hatBrim = new THREE.Mesh(hatBrimGeometry, hatMaterial);
-            hatBrim.position.y = 1.7;
-            hatBrim.castShadow = true;
-            character.add(hatBrim);
-
-            // Arms
-            const armGeometry = new THREE.CapsuleGeometry(0.12, 0.6, 4, 8);
-            const armMaterial = new THREE.MeshStandardMaterial({ color: 0x2196F3 });
-            
-            const leftArm = new THREE.Mesh(armGeometry, armMaterial);
-            leftArm.position.set(-0.5, 0.6, 0);
-            leftArm.rotation.z = 0.3;
-            leftArm.castShadow = true;
-            character.add(leftArm);
-
-            const rightArm = new THREE.Mesh(armGeometry, armMaterial);
-            rightArm.position.set(0.5, 0.6, 0);
-            rightArm.rotation.z = -0.3;
-            rightArm.castShadow = true;
-            character.add(rightArm);
-
-            // Legs
-            const legGeometry = new THREE.CapsuleGeometry(0.15, 0.7, 4, 8);
-            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x1976D2 });
-            
-            const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-            leftLeg.position.set(-0.2, -0.35, 0);
-            leftLeg.castShadow = true;
-            character.add(leftLeg);
-            character.userData.leftLeg = leftLeg;
-
-            const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
-            rightLeg.position.set(0.2, -0.35, 0);
-            rightLeg.castShadow = true;
-            character.add(rightLeg);
-            character.userData.rightLeg = rightLeg;
-
-            return character;
-        }
-
-        const character = createCharacter();
-        character.position.set(0, 1.25, 0);
-        scene.add(character);
-
-        // Add decorative trees
-        function createTree(x, z) {
-            const tree = new THREE.Group();
-            
-            // Trunk
-            const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
-            const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-            trunk.position.y = 1.5;
-            trunk.castShadow = true;
-            tree.add(trunk);
-
-            // Foliage (3 spheres)
-            const foliageGeometry = new THREE.SphereGeometry(1.2, 8, 8);
-            const foliageMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-            
-            for (let i = 0; i < 3; i++) {
-                const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
-                foliage.position.y = 3 + i * 0.5;
-                foliage.scale.y = 0.8;
-                foliage.castShadow = true;
-                tree.add(foliage);
-            }
-
-            tree.position.set(x, 0, z);
-            return tree;
-        }
-
-        // Add trees around the scene
-        const treePositions = [
-            [-20, -10], [20, -10], [-25, -30], [25, -30],
-            [-15, -45], [15, -45], [-30, -20], [30, -20]
-        ];
-
-        treePositions.forEach(pos => {
-            scene.add(createTree(pos[0], pos[1]));
-        });
-
-        // Add decorative rocks
-        function createRock(x, z) {
-            const rockGeometry = new THREE.DodecahedronGeometry(0.5 + Math.random() * 0.5, 0);
-            const rockMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x808080,
-                roughness: 0.9
-            });
-            const rock = new THREE.Mesh(rockGeometry, rockMaterial);
-            rock.position.set(x, 0.3, z);
-            rock.rotation.set(
-                Math.random() * Math.PI,
-                Math.random() * Math.PI,
-                Math.random() * Math.PI
-            );
-            rock.castShadow = true;
-            rock.receiveShadow = true;
-            return rock;
-        }
-
-        // Scatter some rocks
-        for (let i = 0; i < 20; i++) {
-            const x = (Math.random() - 0.5) * 80;
-            const z = (Math.random() - 0.5) * 80;
-            scene.add(createRock(x, z));
-        }
-
-        // Billboard Data
-        const billboardData = [
-            {
-                title: "About Me",
-                position: { x: 0, z: -15 },
-                color: 0x2196F3,
-                content: `
-                    <h2>👋 About Me</h2>
-                    <p>Welcome to my interactive portfolio! I'm a creative developer passionate about building immersive web experiences.</p>
-                    <p>This 3D environment showcases my projects in a unique and engaging way. Feel free to explore and interact with each billboard to learn more about my work.</p>
-                    <p><strong>Skills:</strong> Three.js, WebGL, JavaScript, React, Node.js, and more!</p>
-                `
-            },
-            {
-                title: "Project 1",
-                position: { x: -12, z: -25 },
-                color: 0xFF9800,
-                content: `
-                    <h2>🚀 E-Commerce Platform</h2>
-                    <p>A full-stack e-commerce solution built with modern technologies.</p>
-                    <ul>
-                        <li>React frontend with responsive design</li>
-                        <li>Node.js/Express backend API</li>
-                        <li>MongoDB database integration</li>
-                        <li>Stripe payment processing</li>
-                        <li>Real-time inventory management</li>
-                    </ul>
-                    <p><strong>Technologies:</strong> React, Node.js, Express, MongoDB, Stripe</p>
-                `
-            },
-            {
-                title: "Project 2",
-                position: { x: 12, z: -25 },
-                color: 0x9C27B0,
-                content: `
-                    <h2>🎨 3D Product Visualizer</h2>
-                    <p>An interactive 3D product showcase using Three.js and WebGL.</p>
-                    <ul>
-                        <li>Real-time 3D model rendering</li>
-                        <li>Custom material editor</li>
-                        <li>AR preview mode</li>
-                        <li>Performance-optimized for mobile</li>
-                        <li>Integration with e-commerce platforms</li>
-                    </ul>
-                    <p><strong>Technologies:</strong> Three.js, WebGL, React, GLTF</p>
-                `
-            },
-            {
-                title: "Experience",
-                position: { x: -10, z: -40 },
-                color: 0xF44336,
-                content: `
-                    <h2>💼 Professional Experience</h2>
-                    <h3>Senior Frontend Developer @ Tech Corp (2022-Present)</h3>
-                    <ul>
-                        <li>Lead development of interactive web applications</li>
-                        <li>Mentor junior developers and conduct code reviews</li>
-                        <li>Implement 3D visualization features using Three.js</li>
-                    </ul>
-                    <h3>Full Stack Developer @ StartupXYZ (2020-2022)</h3>
-                    <ul>
-                        <li>Built scalable web applications from scratch</li>
-                        <li>Developed RESTful APIs and database architectures</li>
-                        <li>Improved application performance by 40%</li>
-                    </ul>
-                `
-            },
-            {
-                title: "Contact",
-                position: { x: 10, z: -40 },
-                color: 0x4CAF50,
-                content: `
-                    <h2>📬 Get In Touch</h2>
-                    <p>I'd love to hear about your project or discuss opportunities to collaborate!</p>
-                    <p><strong>Email:</strong> your.email@example.com</p>
-                    <p><strong>LinkedIn:</strong> linkedin.com/in/yourprofile</p>
-                    <p><strong>GitHub:</strong> github.com/yourusername</p>
-                    <p><strong>Portfolio:</strong> yourwebsite.com</p>
-                    <p>Feel free to reach out for freelance work, full-time opportunities, or just to chat about web development and 3D graphics!</p>
-                `
-            }
-        ];
-
-        // Create Billboards
-        const billboards = [];
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        billboardData.forEach((data, index) => {
-            const billboardGroup = new THREE.Group();
-            
-            // Billboard base/stand
-            const standGeometry = new THREE.CylinderGeometry(0.2, 0.3, 2, 8);
-            const standMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
-            const stand = new THREE.Mesh(standGeometry, standMaterial);
-            stand.position.y = 1;
-            stand.castShadow = true;
-            billboardGroup.add(stand);
-
-            // Billboard screen with glow
-            const screenGeometry = new THREE.BoxGeometry(4, 3, 0.2);
-            const screenMaterial = new THREE.MeshStandardMaterial({ 
-                color: data.color,
-                emissive: data.color,
-                emissiveIntensity: 0.4
-            });
-            const screen = new THREE.Mesh(screenGeometry, screenMaterial);
-            screen.position.y = 3.5;
-            screen.castShadow = true;
-            billboardGroup.add(screen);
-
-            // Add border/frame
-            const frameGeometry = new THREE.BoxGeometry(4.2, 3.2, 0.1);
-            const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
-            const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-            frame.position.set(0, 3.5, -0.15);
-            billboardGroup.add(frame);
-
-            // Text using canvas texture
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 384;
-            const ctx = canvas.getContext('2d');
-            
-            // Gradient background
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#ffffff');
-            gradient.addColorStop(1, '#f0f0f0');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Text
-            ctx.fillStyle = '#000000';
-            ctx.font = 'bold 56px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(data.title, canvas.width / 2, canvas.height / 2);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const textMaterial = new THREE.MeshBasicMaterial({ map: texture });
-            const textPlane = new THREE.Mesh(
-                new THREE.PlaneGeometry(3.8, 2.85),
-                textMaterial
-            );
-            textPlane.position.set(0, 3.5, 0.11);
-            billboardGroup.add(textPlane);
-
-            billboardGroup.position.set(data.position.x, 0, data.position.z);
-            billboardGroup.userData = { content: data.content, index };
-            
-            scene.add(billboardGroup);
-            billboards.push(billboardGroup);
-        });
-
-        // ORBIT CONTROLS SETUP (Manual implementation since we're using r128)
-        let isOrbitMode = false;
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        let orbitRotation = { theta: 0, phi: Math.PI / 4 };
-        let orbitDistance = 15;
-        let orbitTarget = new THREE.Vector3(0, 2, -20);
-
-        renderer.domElement.addEventListener('mousedown', (e) => {
-            if (isOrbitMode) {
-                isDragging = true;
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            }
-        });
-
-        renderer.domElement.addEventListener('mousemove', (e) => {
-            if (isOrbitMode && isDragging) {
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
-                
-                orbitRotation.theta -= deltaX * 0.005;
-                orbitRotation.phi -= deltaY * 0.005;
-                
-                // Clamp phi to prevent flipping
-                orbitRotation.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbitRotation.phi));
-                
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            }
-        });
-
-        renderer.domElement.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        renderer.domElement.addEventListener('wheel', (e) => {
-            if (isOrbitMode) {
-                e.preventDefault();
-                orbitDistance += e.deltaY * 0.01;
-                orbitDistance = Math.max(5, Math.min(50, orbitDistance));
-            }
-        });
-
-        // View Mode Toggle
-        const viewButtons = document.querySelectorAll('.view-btn');
-        viewButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mode = btn.getAttribute('data-mode');
-                viewButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                isOrbitMode = mode === 'orbit';
-                
-                if (isOrbitMode) {
-                    orbitTarget.copy(character.position);
-                }
-            });
-        });
-
-        // Character Movement
-        const keys = {};
-        const moveSpeed = 0.15;
-        const rotateSpeed = 0.03;
-        let walkCycle = 0;
-
-        document.addEventListener('keydown', (e) => {
-            keys[e.key.toLowerCase()] = true;
-        });
-
-        document.addEventListener('keyup', (e) => {
-            keys[e.key.toLowerCase()] = false;
-        });
-
-        // Mobile controls
-        const mobileControls = document.querySelectorAll('.control-btn');
-        mobileControls.forEach(btn => {
-            btn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const key = btn.getAttribute('data-key');
-                keys[key] = true;
-            });
-            btn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                const key = btn.getAttribute('data-key');
-                keys[key] = false;
-            });
-        });
-
-        function updateCharacterMovement() {
-            if (isOrbitMode) return;
-
-            let isMoving = false;
-
-            // Rotation
-            if (keys['a'] || keys['arrowleft']) {
-                character.rotation.y += rotateSpeed;
-            }
-            if (keys['d'] || keys['arrowright']) {
-                character.rotation.y -= rotateSpeed;
-            }
-
-            // Movement
-            const direction = new THREE.Vector3();
-            if (keys['w'] || keys['arrowup']) {
-                direction.z = -1;
-                isMoving = true;
-            }
-            if (keys['s'] || keys['arrowdown']) {
-                direction.z = 1;
-                isMoving = true;
-            }
-
-            if (direction.length() > 0) {
-                direction.applyEuler(character.rotation);
-                character.position.add(direction.multiplyScalar(moveSpeed));
-
-                // Enhanced walk animation
-                walkCycle += 0.2;
-                character.position.y = 1.25 + Math.sin(walkCycle) * 0.1;
-                
-                // Animate legs
-                if (character.userData.leftLeg && character.userData.rightLeg) {
-                    character.userData.leftLeg.rotation.x = Math.sin(walkCycle) * 0.5;
-                    character.userData.rightLeg.rotation.x = -Math.sin(walkCycle) * 0.5;
-                }
-            } else {
-                // Reset position when not moving
-                character.position.y = 1.25;
-                if (character.userData.leftLeg && character.userData.rightLeg) {
-                    character.userData.leftLeg.rotation.x = 0;
-                    character.userData.rightLeg.rotation.x = 0;
-                }
-            }
-
-            // Keep character within bounds
-            character.position.x = Math.max(-45, Math.min(45, character.position.x));
-            character.position.z = Math.max(-45, Math.min(45, character.position.z));
-        }
-
-        // Camera Control
-        function updateCamera() {
-            if (isOrbitMode) {
-                // Orbit camera
-                const x = orbitTarget.x + orbitDistance * Math.sin(orbitRotation.phi) * Math.cos(orbitRotation.theta);
-                const y = orbitTarget.y + orbitDistance * Math.cos(orbitRotation.phi);
-                const z = orbitTarget.z + orbitDistance * Math.sin(orbitRotation.phi) * Math.sin(orbitRotation.theta);
-                
-                camera.position.set(x, y, z);
-                camera.lookAt(orbitTarget);
-            } else {
-                // Follow camera (walk mode)
-                const cameraOffset = new THREE.Vector3(0, 3, 5);
-                cameraOffset.applyEuler(character.rotation);
-                
-                camera.position.x = character.position.x + cameraOffset.x;
-                camera.position.y = character.position.y + cameraOffset.y;
-                camera.position.z = character.position.z + cameraOffset.z;
-                
-                camera.lookAt(character.position.x, character.position.y + 1, character.position.z);
-            }
-        }
-
-        // DAY/NIGHT CYCLE
-        let isNightMode = false;
-
-        document.getElementById('toggle-time').addEventListener('click', function() {
-            isNightMode = !isNightMode;
-            
-            if (isNightMode) {
-                // Switch to night
-                this.textContent = '☀️ Day Mode';
-                this.classList.add('night');
-                
-                // Animate to night colors
-                animateSceneToNight();
-            } else {
-                // Switch to day
-                this.textContent = '🌙 Night Mode';
-                this.classList.remove('night');
-                
-                // Animate to day colors
-                animateSceneToDay();
-            }
-        });
-
-        function animateSceneToNight() {
-            const nightSkyColor = 0x0a0a1a;
-            const nightGroundColor = 0x1a2a1a;
-            
-            // Transition colors
-            new TWEEN.Tween(scene.background)
-                .to(new THREE.Color(nightSkyColor), 2000)
-                .onUpdate(() => {
-                    scene.fog.color.copy(scene.background);
-                })
-                .start();
-            
-            new TWEEN.Tween(groundMaterial.color)
-                .to(new THREE.Color(nightGroundColor), 2000)
-                .start();
-            
-            // Adjust lighting
-            new TWEEN.Tween(lights.sun)
-                .to({ intensity: 0 }, 2000)
-                .start();
-            
-            new TWEEN.Tween(lights.moon)
-                .to({ intensity: 0.3 }, 2000)
-                .start();
-            
-            new TWEEN.Tween(lights.ambient)
-                .to({ intensity: 0.2 }, 2000)
-                .start();
-            
-            new TWEEN.Tween(starsMaterial)
-                .to({ opacity: 1 }, 2000)
-                .start();
-        }
-
-        function animateSceneToDay() {
-            const daySkyColor = 0x87ceeb;
-            const dayGroundColor = 0x3a7a3a;
-            
-            new TWEEN.Tween(scene.background)
-                .to(new THREE.Color(daySkyColor), 2000)
-                .onUpdate(() => {
-                    scene.fog.color.copy(scene.background);
-                })
-                .start();
-            
-            new TWEEN.Tween(groundMaterial.color)
-                .to(new THREE.Color(dayGroundColor), 2000)
-                .start();
-            
-            new TWEEN.Tween(lights.sun)
-                .to({ intensity: 0.8 }, 2000)
-                .start();
-            
-            new TWEEN.Tween(lights.moon)
-                .to({ intensity: 0 }, 2000)
-                .start();
-            
-            new TWEEN.Tween(lights.ambient)
-                .to({ intensity: 0.6 }, 2000)
-                .start();
-            
-            new TWEEN.Tween(starsMaterial)
-                .to({ opacity: 0 }, 2000)
-                .start();
-        }
-
-        // Simple tween system (replacing TWEEN.js for simplicity)
-        class TWEEN {
-            static tweens = [];
-            
-            static Tween = class {
-                constructor(object) {
-                    this.object = object;
-                    this.startValues = {};
-                    this.endValues = {};
-                    this.duration = 1000;
-                    this.elapsed = 0;
-                    this.onUpdateCallback = null;
-                    this.onCompleteCallback = null;
-                }
-                
-                to(properties, duration) {
-                    this.endValues = properties;
-                    this.duration = duration;
-                    for (let prop in properties) {
-                        this.startValues[prop] = this.object[prop];
-                    }
-                    return this;
-                }
-                
-                onUpdate(callback) {
-                    this.onUpdateCallback = callback;
-                    return this;
-                }
-                
-                onComplete(callback) {
-                    this.onCompleteCallback = callback;
-                    return this;
-                }
-                
-                start() {
-                    this.elapsed = 0;
-                    for (let prop in this.endValues) {
-                        if (this.object[prop] instanceof THREE.Color) {
-                            this.startValues[prop] = this.object[prop].clone();
-                        } else {
-                            this.startValues[prop] = this.object[prop];
-                        }
-                    }
-                    TWEEN.tweens.push(this);
-                    return this;
-                }
-                
-                update(delta) {
-                    this.elapsed += delta;
-                    const progress = Math.min(this.elapsed / this.duration, 1);
-                    
-                    for (let prop in this.endValues) {
-                        if (this.object[prop] instanceof THREE.Color) {
-                            this.object[prop].lerpColors(
-                                this.startValues[prop],
-                                this.endValues[prop],
-                                progress
-                            );
-                        } else {
-                            this.object[prop] = this.startValues[prop] + 
-                                (this.endValues[prop] - this.startValues[prop]) * progress;
-                        }
-                    }
-                    
-                    if (this.onUpdateCallback) {
-                        this.onUpdateCallback();
-                    }
-                    
-                    if (progress === 1) {
-                        if (this.onCompleteCallback) {
-                            this.onCompleteCallback();
-                        }
-                        return true; // Completed
-                    }
-                    return false;
-                }
-            };
-            
-            static update(delta) {
-                TWEEN.tweens = TWEEN.tweens.filter(tween => !tween.update(delta));
-            }
-        }
-
-        // MUSIC SYSTEM
-        let audioContext = null;
-        let musicPlaying = false;
-        let oscillator = null;
-        let gainNode = null;
-
-        document.getElementById('toggle-music').addEventListener('click', function() {
-            if (!musicPlaying) {
-                startMusic();
-                document.getElementById('music-icon').textContent = '🔊';
-                document.getElementById('music-text').textContent = 'Stop Music';
-                musicPlaying = true;
-            } else {
-                stopMusic();
-                document.getElementById('music-icon').textContent = '🔇';
-                document.getElementById('music-text').textContent = 'Play Music';
-                musicPlaying = false;
-            }
-        });
-
-        function startMusic() {
-            // Create a simple ambient music using Web Audio API
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Create a simple melody pattern
-            const melody = [261.63, 293.66, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66];
-            let noteIndex = 0;
-            
-            function playNote() {
-                if (!musicPlaying) return;
-                
-                oscillator = audioContext.createOscillator();
-                gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = melody[noteIndex];
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.8);
-                
-                noteIndex = (noteIndex + 1) % melody.length;
-                
-                setTimeout(playNote, 500);
-            }
-            
-            playNote();
-        }
-
-        function stopMusic() {
-            if (oscillator) {
-                oscillator.stop();
-                oscillator = null;
-            }
-            if (audioContext) {
-                audioContext.close();
-                audioContext = null;
-            }
-        }
-
-        // Billboard Interaction
-        let nearestBillboard = null;
-
-        function checkBillboardProximity() {
-            if (isOrbitMode) {
-                document.getElementById('interaction-prompt').style.display = 'none';
-                return;
-            }
-
-            let closest = null;
-            let minDistance = Infinity;
-
-            billboards.forEach(billboard => {
-                const distance = character.position.distanceTo(billboard.position);
-                if (distance < 5 && distance < minDistance) {
-                    minDistance = distance;
-                    closest = billboard;
-                }
-            });
-
-            nearestBillboard = closest;
-            const prompt = document.getElementById('interaction-prompt');
-            
-            if (nearestBillboard) {
-                prompt.style.display = 'block';
-            } else {
-                prompt.style.display = 'none';
-            }
-        }
-
-        // Click to interact
-        document.getElementById('interaction-prompt').addEventListener('click', () => {
-            if (nearestBillboard) {
-                openBillboard(nearestBillboard.userData.content);
-            }
-        });
-
-        // Also allow clicking directly on billboards
-        renderer.domElement.addEventListener('click', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(billboards, true);
-
-            if (intersects.length > 0) {
-                let billboard = intersects[0].object;
-                while (billboard.parent && !billboard.userData.content) {
-                    billboard = billboard.parent;
-                }
-                if (billboard.userData.content) {
-                    openBillboard(billboard.userData.content);
-                }
-            }
-        });
-
-        // Modal functions
-        function openBillboard(content) {
-            document.getElementById('modal-content').innerHTML = content;
-            document.getElementById('billboard-modal').classList.add('active');
-        }
-
-        document.getElementById('close-modal').addEventListener('click', () => {
-            document.getElementById('billboard-modal').classList.remove('active');
-        });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.getElementById('billboard-modal').classList.remove('active');
-            }
-        });
-
-        // Instructions toggle
-        document.getElementById('toggle-instructions').addEventListener('click', function() {
-            const content = document.getElementById('instruction-content');
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-                this.textContent = 'Hide';
-            } else {
-                content.style.display = 'none';
-                this.textContent = 'Show';
-            }
-        });
-
-        // Minimap
-        const minimapCanvas = document.getElementById('minimap');
-        const minimapCtx = minimapCanvas.getContext('2d');
-        minimapCanvas.width = 200;
-        minimapCanvas.height = 200;
-
-        function drawMinimap() {
-            minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            minimapCtx.fillRect(0, 0, 200, 200);
-            
-            // Draw grid
-            minimapCtx.strokeStyle = 'rgba(76, 175, 80, 0.3)';
-            minimapCtx.lineWidth = 1;
-            for (let i = 0; i <= 200; i += 20) {
-                minimapCtx.beginPath();
-                minimapCtx.moveTo(i, 0);
-                minimapCtx.lineTo(i, 200);
-                minimapCtx.stroke();
-                minimapCtx.beginPath();
-                minimapCtx.moveTo(0, i);
-                minimapCtx.lineTo(200, i);
-                minimapCtx.stroke();
-            }
-            
-            // Draw billboards
-            billboards.forEach(billboard => {
-                const x = (billboard.position.x + 50) * 2;
-                const z = (billboard.position.z + 50) * 2;
-                minimapCtx.fillStyle = '#FF9800';
-                minimapCtx.fillRect(x - 3, z - 3, 6, 6);
-            });
-            
-            // Draw character
-            const charX = (character.position.x + 50) * 2;
-            const charZ = (character.position.z + 50) * 2;
-            minimapCtx.fillStyle = '#4CAF50';
-            minimapCtx.beginPath();
-            minimapCtx.arc(charX, charZ, 5, 0, Math.PI * 2);
-            minimapCtx.fill();
-            
-            // Direction indicator
-            minimapCtx.strokeStyle = '#4CAF50';
-            minimapCtx.lineWidth = 2;
-            minimapCtx.beginPath();
-            minimapCtx.moveTo(charX, charZ);
-            minimapCtx.lineTo(
-                charX + Math.sin(-character.rotation.y) * 10,
-                charZ + Math.cos(-character.rotation.y) * 10
-            );
-            minimapCtx.stroke();
-        }
-
-        // Animation Loop
-        let lastTime = Date.now();
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const currentTime = Date.now();
-            const delta = currentTime - lastTime;
-            lastTime = currentTime;
-            
-            updateCharacterMovement();
-            updateCamera();
-            checkBillboardProximity();
-            drawMinimap();
-            TWEEN.update(delta);
-            
-            renderer.render(scene, camera);
-        }
-
-        // Window Resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Loading Screen
-        setTimeout(() => {
-            document.getElementById('loading-screen').classList.add('hidden');
-        }, 1500);
-
-        // Start Animation
-        animate();
-  
-
-
-
-</script>
 
 </body>
 </html>
