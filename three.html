@@ -1,3 +1,97 @@
-<script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js';
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Portfolio - Step Into My World</title>
+
+</head>
+<body>
+    <!-- Vignette Effect -->
+    <div id="vignette"></div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p id="loading-text">Loading Your Portfolio Experience</p>
+        <p id="loading-subtext">Preparing your avatar and interactive 3D environment...</p>
+        <div id="loading-progress">
+            <div id="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- Canvas -->
+    <div id="canvas-container"></div>
+    <canvas id="minimap"></canvas>
+
+    <!-- UI Overlay -->
+    <div id="ui-overlay">
+        <!-- Instructions -->
+        <div id="instructions">
+            <h3>🎮 Navigation</h3>
+            <div id="instruction-content">
+                <p><span class="emoji">⬆️</span> W / ↑ - Move Forward</p>
+                <p><span class="emoji">⬇️</span> S / ↓ - Move Backward</p>
+                <p><span class="emoji">⬅️</span> A / ← - Turn Left</p>
+                <p><span class="emoji">➡️</span> D / → - Turn Right</p>
+                <p><span class="emoji">🖱️</span> Orbit: Drag to explore</p>
+                <p><span class="emoji">🎯</span> Click billboards to learn more</p>
+                <p><span class="emoji">✨</span> Discover hidden features!</p>
+            </div>
+            <button id="toggle-instructions">Hide</button>
+        </div>
+
+        <!-- View Controls -->
+        <div id="view-controls">
+            <button class="view-btn active" data-mode="walk">🚶 First Person</button>
+            <button class="view-btn" data-mode="orbit">🔄 Free Cam</button>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div id="bottom-controls">
+            <button class="control-btn-bottom" id="toggle-time">🌙 Night Mode</button>
+            <button class="control-btn-bottom" id="toggle-particles">✨ Magic On</button>
+        </div>
+
+        <!-- Music Controls -->
+        <div id="music-controls">
+            <button class="music-btn" id="toggle-music">
+                <span id="music-icon">🔇</span>
+                <span id="music-text">Play Ambience</span>
+            </button>
+        </div>
+
+        <!-- Stats Panel -->
+        <div id="stats-panel">
+            <div><span class="stat-label">FPS:</span> <span id="fps-value">60</span></div>
+            <div><span class="stat-label">Objects:</span> <span id="objects-value">0</span></div>
+            <div><span class="stat-label">Quality:</span> <span id="quality-value">High</span></div>
+        </div>
+
+        <!-- Character Name Tooltip -->
+        <div id="character-name">Your Avatar</div>
+
+        <!-- Interaction Prompt -->
+        <div id="interaction-prompt">🎯 Explore This Project</div>
+
+        <!-- Billboard Modal -->
+        <div id="billboard-modal">
+            <button id="close-modal">×</button>
+            <div id="modal-content"></div>
+        </div>
+
+        <!-- Mobile Controls -->
+        <div id="mobile-controls">
+            <div class="control-btn" data-key="a">↺</div>
+            <div class="control-btn" data-key="w">↑</div>
+            <div class="control-btn" data-key="s">↓</div>
+            <div class="control-btn" data-key="d">↻</div>
+        </div>
+    </div>
+
+
+
+
+
+</body>
+</html>
