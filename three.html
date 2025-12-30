@@ -682,8 +682,1490 @@
     </div>
 
 
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.154.0/examples/jsm/"
+    }
+}
+</script>
 
+    <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // ============================================
+        // SCENE SETUP
+        // ============================================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.FogExp2(0x87ceeb, 0.012);
 
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // ============================================
+        // LIGHTING SYSTEM
+        // ============================================
+        const lights = {
+            ambient: new THREE.AmbientLight(0xffffff, 0.6),
+            sun: new THREE.DirectionalLight(0xfff5e1, 1.5),
+            moon: new THREE.DirectionalLight(0x6b7c9e, 0),
+            pointLights: []
+        };
+
+        scene.add(lights.ambient);
+
+        lights.sun.position.set(20, 30, 20);
+        lights.sun.castShadow = true;
+        lights.sun.shadow.camera.left = -60;
+        lights.sun.shadow.camera.right = 60;
+        lights.sun.shadow.camera.top = 60;
+        lights.sun.shadow.camera.bottom = -60;
+        lights.sun.shadow.mapSize.width = 2048;
+        lights.sun.shadow.mapSize.height = 2048;
+        lights.sun.shadow.bias = -0.0001;
+        scene.add(lights.sun);
+
+        lights.moon.position.set(-20, 30, -20);
+        lights.moon.castShadow = true;
+        scene.add(lights.moon);
+
+        // Add atmospheric point lights
+        const pointLightPositions = [
+            { pos: [-30, 5, -30], color: 0x4CAF50 },
+            { pos: [30, 5, -30], color: 0x2196F3 },
+            { pos: [0, 5, -50], color: 0xFF9800 }
+        ];
+
+        pointLightPositions.forEach(({pos, color}) => {
+            const light = new THREE.PointLight(color, 1, 50);
+            light.position.set(...pos);
+            lights.pointLights.push(light);
+            scene.add(light);
+        });
+
+        // ============================================
+        // STARS
+        // ============================================
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.2,
+            transparent: true,
+            opacity: 0,
+            sizeAttenuation: true
+        });
+
+        const starsVertices = [];
+        for (let i = 0; i < 3000; i++) {
+            const x = (Math.random() - 0.5) * 400;
+            const y = Math.random() * 200 + 30;
+            const z = (Math.random() - 0.5) * 400;
+            starsVertices.push(x, y, z);
+        }
+
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
+
+        // ============================================
+        // GROUND WITH TERRAIN
+        // ============================================
+        const groundGeometry = new THREE.PlaneGeometry(200, 200, 100, 100);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3a7a3a,
+            roughness: 0.9,
+            metalness: 0.05
+        });
+        
+        const positions = groundGeometry.attributes.position;
+        for (let i = 0; i < positions.count; i++) {
+            const x = positions.getX(i);
+            const z = positions.getZ(i);
+            const height = Math.sin(x * 0.05) * Math.cos(z * 0.05) * 0.8 + 
+                          Math.sin(x * 0.15) * Math.cos(z * 0.15) * 0.3;
+            positions.setY(i, height);
+        }
+        groundGeometry.computeVertexNormals();
+
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Subtle grid
+        const gridHelper = new THREE.GridHelper(200, 100, 0x000000, 0x2a5a2a);
+        gridHelper.position.y = 0.02;
+        gridHelper.material.opacity = 0.15;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        // ============================================
+        // PATH/ROAD - Enhanced
+        // ============================================
+        function createEnhancedPath() {
+            const pathShape = new THREE.Shape();
+            pathShape.moveTo(-3, 0);
+            pathShape.lineTo(-3, -70);
+            pathShape.quadraticCurveTo(-3, -73, 0, -73);
+            pathShape.lineTo(0, -70);
+            pathShape.lineTo(3, -70);
+            pathShape.lineTo(3, 0);
+            pathShape.quadraticCurveTo(3, 3, 0, 3);
+            pathShape.lineTo(0, 0);
+            pathShape.lineTo(-3, 0);
+
+            const pathGeometry = new THREE.ShapeGeometry(pathShape);
+            const pathMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x505050,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const path = new THREE.Mesh(pathGeometry, pathMaterial);
+            path.rotation.x = -Math.PI / 2;
+            path.position.y = 0.08;
+            path.receiveShadow = true;
+            scene.add(path);
+
+            // Road markings
+            for (let i = 0; i < 15; i++) {
+                const markingGeometry = new THREE.BoxGeometry(0.4, 0.02, 2);
+                const markingMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xffff00,
+                    emissive: 0xffff00,
+                    emissiveIntensity: 0.7
+                });
+                const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+                marking.position.set(0, 0.09, -i * 4.5 - 2);
+                scene.add(marking);
+            }
+        }
+        createEnhancedPath();
+
+        // ============================================
+        // LOAD READY PLAYER ME CHARACTER
+        // ============================================
+        let character = null;
+        let characterMixer = null;
+        let walkAction = null;
+        const characterGroup = new THREE.Group();
+        scene.add(characterGroup);
+
+        const loader = new GLTFLoader();
+        let loadingProgress = 0;
+
+        loader.load(
+            './69538cd3df527aeb84959b85.glb',
+            function (gltf) {
+                character = gltf.scene;
+                
+                // Scale and position
+                character.scale.set(1.2, 1.2, 1.2);
+                character.position.set(0, 0, 0);
+                
+                // Enable shadows
+                character.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                        
+                        // Enhance materials
+                        if (node.material) {
+                            node.material.roughness = 0.8;
+                            node.material.metalness = 0.2;
+                        }
+                    }
+                });
+                
+                characterGroup.add(character);
+                characterGroup.position.set(0, 0, 0);
+                
+                // Setup animations if available
+                if (gltf.animations && gltf.animations.length > 0) {
+                    characterMixer = new THREE.AnimationMixer(character);
+                    walkAction = characterMixer.clipAction(gltf.animations[0]);
+                    walkAction.play();
+                }
+                
+                console.log('✅ Character loaded successfully!');
+                document.getElementById('loading-bar').style.width = '100%';
+                
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    showCharacterName();
+                }, 500);
+            },
+            function (xhr) {
+                loadingProgress = (xhr.loaded / xhr.total * 100);
+                document.getElementById('loading-bar').style.width = loadingProgress + '%';
+                console.log((loadingProgress) + '% loaded');
+            },
+            function (error) {
+                console.error('Error loading character:', error);
+                document.getElementById('loading-text').textContent = 'Loading Complete!';
+                document.getElementById('loading-subtext').textContent = 'Using backup character...';
+                document.getElementById('loading-bar').style.width = '100%';
+                
+                // Create backup simple character
+                const backupCharacter = createBackupCharacter();
+                characterGroup.add(backupCharacter);
+                
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                }, 1000);
+            }
+        );
+
+        // Backup character if model fails to load
+        function createBackupCharacter() {
+            const backup = new THREE.Group();
+            const bodyGeometry = new THREE.CapsuleGeometry(0.4, 1.5, 4, 8);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            backup.add(body);
+            return backup;
+        }
+
+        function showCharacterName() {
+            const nameTag = document.getElementById('character-name');
+            nameTag.classList.add('show');
+            setTimeout(() => {
+                nameTag.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // ENHANCED TREES (LOD System)
+        // ============================================
+        function createPremiumTree(x, z) {
+            const lod = new THREE.LOD();
+            
+            function createDetailedTree() {
+                const tree = new THREE.Group();
+                
+                // Trunk
+                const trunkGeometry = new THREE.CylinderGeometry(0.35, 0.5, 4, 12);
+                const trunkMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x6d4c41,
+                    roughness: 0.9
+                });
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                trunk.position.y = 2;
+                trunk.castShadow = true;
+                trunk.receiveShadow = true;
+                tree.add(trunk);
+
+                // Foliage layers
+                const foliageGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                const foliageMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x2d5016,
+                    roughness: 0.9
+                });
+                
+                for (let i = 0; i < 4; i++) {
+                    const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+                    foliage.position.y = 3.5 + i * 0.6;
+                    foliage.scale.set(1 - i * 0.15, 0.8, 1 - i * 0.15);
+                    foliage.castShadow = true;
+                    tree.add(foliage);
+                }
+                return tree;
+            }
+
+            function createMediumTree() {
+                const tree = new THREE.Group();
+                const trunk = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.35, 0.5, 4, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x6d4c41 })
+                );
+                trunk.position.y = 2;
+                tree.add(trunk);
+
+                const foliage = new THREE.Mesh(
+                    new THREE.SphereGeometry(1.5, 8, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x2d5016 })
+                );
+                foliage.position.y = 4.5;
+                tree.add(foliage);
+                return tree;
+            }
+
+            function createSimpleTree() {
+                const tree = new THREE.Group();
+                const combined = new THREE.Mesh(
+                    new THREE.ConeGeometry(2, 6, 6),
+                    new THREE.MeshBasicMaterial({ color: 0x2d5016 })
+                );
+                combined.position.y = 3;
+                tree.add(combined);
+                return tree;
+            }
+
+            lod.addLevel(createDetailedTree(), 0);
+            lod.addLevel(createMediumTree(), 25);
+            lod.addLevel(createSimpleTree(), 50);
+            
+            lod.position.set(x, 0, z);
+            return lod;
+        }
+
+        // Strategic tree placement
+        const treePositions = [
+            [-30, -15], [30, -15], [-35, -35], [35, -35],
+            [-25, -55], [25, -55], [-40, -25], [40, -25],
+            [-20, -20], [20, -20], [-32, -45], [32, -45],
+            [-15, -10], [15, -10], [-38, -50], [38, -50]
+        ];
+
+        treePositions.forEach(pos => {
+            scene.add(createPremiumTree(pos[0], pos[1]));
+        });
+
+        // ============================================
+        // ROCKS (Instanced)
+        // ============================================
+        const rockGeometry = new THREE.DodecahedronGeometry(0.6, 1);
+        const rockMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x707070,
+            roughness: 0.95,
+            metalness: 0.1
+        });
+        const rockCount = 80;
+        const rocks = new THREE.InstancedMesh(rockGeometry, rockMaterial, rockCount);
+        rocks.castShadow = true;
+        rocks.receiveShadow = true;
+
+        const rockMatrix = new THREE.Matrix4();
+        for (let i = 0; i < rockCount; i++) {
+            const x = (Math.random() - 0.5) * 180;
+            const z = (Math.random() - 0.5) * 180;
+            const scale = 0.4 + Math.random() * 1;
+            const rotX = Math.random() * Math.PI;
+            const rotY = Math.random() * Math.PI;
+            const rotZ = Math.random() * Math.PI;
+            
+            rockMatrix.makeRotationFromEuler(new THREE.Euler(rotX, rotY, rotZ));
+            rockMatrix.setPosition(x, scale * 0.4, z);
+            rockMatrix.scale(new THREE.Vector3(scale, scale, scale));
+            rocks.setMatrixAt(i, rockMatrix);
+        }
+        scene.add(rocks);
+
+        // ============================================
+        // CLOUDS (Volumetric)
+        // ============================================
+        const clouds = [];
+        function createVolumetricCloud(x, y, z) {
+            const cloud = new THREE.Group();
+            
+            for (let i = 0; i < 8; i++) {
+                const cloudPart = new THREE.Mesh(
+                    new THREE.SphereGeometry(1.5 + Math.random() * 0.8, 10, 10),
+                    new THREE.MeshStandardMaterial({ 
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0.75,
+                        roughness: 1
+                    })
+                );
+                cloudPart.position.set(
+                    (Math.random() - 0.5) * 4,
+                    Math.random() * 1.2,
+                    (Math.random() - 0.5) * 4
+                );
+                cloud.add(cloudPart);
+            }
+            
+            cloud.position.set(x, y, z);
+            return cloud;
+        }
+
+        for (let i = 0; i < 20; i++) {
+            const cloud = createVolumetricCloud(
+                (Math.random() - 0.5) * 200,
+                25 + Math.random() * 20,
+                (Math.random() - 0.5) * 200
+            );
+            clouds.push(cloud);
+            scene.add(cloud);
+        }
+
+        // ============================================
+        // MAGICAL PARTICLES
+        // ============================================
+        let particlesEnabled = false;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCnt = 1200;
+        const posArray = new Float32Array(particlesCnt * 3);
+        const velocityArray = new Float32Array(particlesCnt * 3);
+        const colorArray = new Float32Array(particlesCnt * 3);
+
+        for (let i = 0; i < particlesCnt * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 200;
+            posArray[i + 1] = Math.random() * 40;
+            posArray[i + 2] = (Math.random() - 0.5) * 200;
+            
+            velocityArray[i] = (Math.random() - 0.5) * 0.03;
+            velocityArray[i + 1] = Math.random() * 0.03;
+            velocityArray[i + 2] = (Math.random() - 0.5) * 0.03;
+            
+            // Random colors (gold, cyan, pink)
+            const colorChoice = Math.random();
+            if (colorChoice < 0.33) {
+                colorArray[i] = 1;
+                colorArray[i + 1] = 0.84;
+                colorArray[i + 2] = 0;
+            } else if (colorChoice < 0.66) {
+                colorArray[i] = 0;
+                colorArray[i + 1] = 1;
+                colorArray[i + 2] = 1;
+            } else {
+                colorArray[i] = 1;
+                colorArray[i + 1] = 0.41;
+                colorArray[i + 2] = 0.71;
+            }
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.2,
+            transparent: true,
+            opacity: 0,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true,
+            vertexColors: true
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        document.getElementById('toggle-particles').addEventListener('click', function() {
+            particlesEnabled = !particlesEnabled;
+            if (particlesEnabled) {
+                this.textContent = '❌ Magic Off';
+                new TWEEN.Tween(particlesMaterial)
+                    .to({ opacity: 0.9 }, 1000)
+                    .start();
+            } else {
+                this.textContent = '✨ Magic On';
+                new TWEEN.Tween(particlesMaterial)
+                    .to({ opacity: 0 }, 1000)
+                    .start();
+            }
+        });
+
+        function updateParticles() {
+            if (!particlesEnabled) return;
+            
+            const positions = particlesGeometry.attributes.position.array;
+            for (let i = 0; i < particlesCnt * 3; i += 3) {
+                positions[i] += velocityArray[i];
+                positions[i + 1] += velocityArray[i + 1];
+                positions[i + 2] += velocityArray[i + 2];
+                
+                if (positions[i + 1] > 40) positions[i + 1] = 0;
+                if (positions[i + 1] < 0) positions[i + 1] = 40;
+            }
+            particlesGeometry.attributes.position.needsUpdate = true;
+            particlesMesh.rotation.y += 0.0003;
+        }
+
+        // ============================================
+        // BILLBOARD DATA
+        // ============================================
+        const billboardData = [
+            {
+                title: "👋 About Me",
+                position: { x: 0, z: -18 },
+                color: 0x2196F3,
+                content: `
+                    <h2>👋 Welcome to My World</h2>
+                    <p>Step into my interactive 3D portfolio where technology meets creativity! I'm a passionate developer who believes in pushing the boundaries of web experiences.</p>
+                    <p>This isn't just a portfolio—it's an immersive journey through my work, built with cutting-edge 3D technology and powered by Ready Player Me avatars.</p>
+                    <h3>🚀 What I Do</h3>
+                    <p>I specialize in creating innovative web applications that blend stunning visuals with powerful functionality. From interactive 3D experiences to scalable full-stack solutions, I bring ideas to life.</p>
+                    <h3>💡 My Philosophy</h3>
+                    <p>Technology should be exciting, accessible, and memorable. Every project I create aims to leave a lasting impression while solving real-world problems.</p>
+                    <p><strong>Core Technologies:</strong> Three.js, WebGL, React, Node.js, TypeScript, Python, AWS, and always learning more!</p>
+                `
+            },
+            {
+                title: "🚀 Project Alpha",
+                position: { x: -15, z: -30 },
+                color: 0xFF9800,
+                content: `
+                    <h2>🚀 E-Commerce Evolution Platform</h2>
+                    <p>A revolutionary full-stack e-commerce solution that combines cutting-edge technology with seamless user experience.</p>
+                    
+                    <h3>✨ Key Features</h3>
+                    <ul>
+                        <li><strong>Immersive Shopping:</strong> 3D product visualization with WebGL</li>
+                        <li><strong>AI-Powered:</strong> Smart recommendations and inventory prediction</li>
+                        <li><strong>Real-Time Everything:</strong> Live inventory, notifications, and analytics</li>
+                        <li><strong>Secure Payments:</strong> Advanced Stripe integration with fraud detection</li>
+                        <li><strong>Mobile-First:</strong> PWA with offline capabilities</li>
+                        <li><strong>Admin Intelligence:</strong> Comprehensive analytics dashboard</li>
+                    </ul>
+                    
+                    <h3>🛠️ Technical Stack</h3>
+                    <p><strong>Frontend:</strong> React 18, Redux Toolkit, Three.js, TailwindCSS</p>
+                    <p><strong>Backend:</strong> Node.js, Express, MongoDB, Redis</p>
+                    <p><strong>Infrastructure:</strong> AWS (EC2, S3, CloudFront), Docker</p>
+                    
+                    <h3>📊 Impact</h3>
+                    <p>• 98+ Lighthouse Performance Score</p>
+                    <p>• Sub-second page loads globally</p>
+                    <p>• 45% increase in conversion rates</p>
+                    <p>• Handles 100K+ concurrent users</p>
+                `
+            },
+            {
+                title: "🎨 Project Beta",
+                position: { x: 15, z: -30 },
+                color: 0x9C27B0,
+                content: `
+                    <h2>🎨 Immersive 3D Showroom</h2>
+                    <p>Next-generation product visualization platform that brings e-commerce into the third dimension.</p>
+                    
+                    <h3>🌟 Revolutionary Features</h3>
+                    <ul>
+                        <li><strong>Photorealistic Rendering:</strong> PBR materials with dynamic lighting</li>
+                        <li><strong>Real-Time Customization:</strong> Change colors, materials, configurations instantly</li>
+                        <li><strong>AR Mode:</strong> See products in your space before buying</li>
+                        <li><strong>VR Ready:</strong> Full WebXR support for immersive shopping</li>
+                        <li><strong>Smart Optimization:</strong> Adaptive quality based on device</li>
+                        <li><strong>Analytics Integration:</strong> Track every user interaction</li>
+                    </ul>
+                    
+                    <h3>🎯 Technology Highlights</h3>
+                    <p><strong>3D Engine:</strong> Three.js with custom shaders and post-processing</p>
+                    <p><strong>Model Pipeline:</strong> Blender → Draco compression → GLTF</p>
+                    <p><strong>Performance:</strong> 60fps on mobile, LOD system, frustum culling</p>
+                    
+                    <h3>💼 Business Impact</h3>
+                    <p>• 60% reduction in product returns</p>
+                    <p>• 40% increase in customer engagement</p>
+                    <p>• 25% boost in average order value</p>
+                    <p>• Featured by Awwwards and CSS Design Awards</p>
+                `
+            },
+            {
+                title: "💼 Experience",
+                position: { x: -12, z: -50 },
+                color: 0xF44336,
+                content: `
+                    <h2>💼 Professional Journey</h2>
+                    
+                    <h3>🏢 Senior Creative Developer @ Tech Innovations Inc.</h3>
+                    <p><em>2022 - Present</em></p>
+                    <ul>
+                        <li>Lead architect for flagship 3D web applications serving 500K+ users</li>
+                        <li>Built award-winning immersive experiences using Three.js and WebGL</li>
+                        <li>Pioneered WebXR integration for AR/VR product showcases</li>
+                        <li>Mentored team of 8 developers, conducting workshops and code reviews</li>
+                        <li>Reduced application load time by 70% through optimization strategies</li>
+                        <li>Implemented CI/CD pipelines cutting deployment time by 80%</li>
+                    </ul>
+                    
+                    <h3>💻 Full Stack Developer @ StartupXYZ</h3>
+                    <p><em>2020 - 2022</em></p>
+                    <ul>
+                        <li>Core team member building MVP that secured $3M seed funding</li>
+                        <li>Architected microservices infrastructure handling 20M+ requests/day</li>
+                        <li>Developed real-time collaboration features using WebSockets</li>
+                        <li>Optimized database queries improving performance by 85%</li>
+                        <li>Implemented comprehensive testing achieving 95% code coverage</li>
+                    </ul>
+                    
+                    <h3>🎓 Education & Certifications</h3>
+                    <p><strong>B.S. Computer Science</strong> - Top University (2016-2020)</p>
+                    <p>AWS Certified Solutions Architect • Google Cloud Professional</p>
+                    
+                    <h3>🏆 Achievements</h3>
+                    <p>• Awwwards Site of the Day Winner (2023)</p>
+                    <p>• Speaker at WebGL Summit 2023</p>
+                    <p>• Open Source Contributor (10K+ GitHub stars)</p>
+                `
+            },
+            {
+                title: "📬 Contact",
+                position: { x: 12, z: -50 },
+                color: 0x4CAF50,
+                content: `
+                    <h2>📬 Let's Build Something Amazing</h2>
+                    <p>I'm always excited to connect with fellow creators, potential collaborators, or companies looking to push the boundaries of web technology.</p>
+                    
+                    <h3>🌐 Connect With Me</h3>
+                    <p><strong>📧 Email:</strong> your.email@example.com</p>
+                    <p><strong>💼 LinkedIn:</strong> linkedin.com/in/yourprofile</p>
+                    <p><strong>🐙 GitHub:</strong> github.com/yourusername</p>
+                    <p><strong>🌍 Portfolio:</strong> yourwebsite.com</p>
+                    <p><strong>🐦 Twitter:</strong> @yourhandle</p>
+                    <p><strong>📱 Discord:</strong> YourName#1234</p>
+                    
+                    <h3>💡 I'm Available For</h3>
+                    <ul>
+                        <li><strong>Full-Time Roles:</strong> Senior/Lead Developer positions</li>
+                        <li><strong>Freelance Projects:</strong> 3D web experiences, interactive sites</li>
+                        <li><strong>Consulting:</strong> WebGL optimization, architecture design</li>
+                        <li><strong>Speaking:</strong> Tech conferences, workshops, podcasts</li>
+                        <li><strong>Open Source:</strong> Collaboration on innovative projects</li>
+                    </ul>
+                    
+                    <h3>⚡ Quick Response Promise</h3>
+                    <p>I typically respond within 24 hours. For urgent inquiries, feel free to reach out via LinkedIn direct message.</p>
+                    
+                    <h3>🎯 Current Status</h3>
+                    <p>✅ Open to opportunities | 🚀 Available for freelance | 💬 Always happy to chat!</p>
+                    
+                    <p><em>Let's create something that people will remember! 🌟</em></p>
+                `
+            }
+        ];
+
+        // ============================================
+        // CREATE PREMIUM BILLBOARDS
+        // ============================================
+        const billboards = [];
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        billboardData.forEach((data, index) => {
+            const billboardGroup = new THREE.Group();
+            
+            // Modern stand
+            const standGeometry = new THREE.CylinderGeometry(0.3, 0.4, 3, 16);
+            const standMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a1a,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+            const stand = new THREE.Mesh(standGeometry, standMaterial);
+            stand.position.y = 1.5;
+            stand.castShadow = true;
+            billboardGroup.add(stand);
+
+            // Premium screen
+            const screenGeometry = new THREE.BoxGeometry(5, 4, 0.3);
+            const screenMaterial = new THREE.MeshStandardMaterial({ 
+                color: data.color,
+                emissive: data.color,
+                emissiveIntensity: 0.6,
+                metalness: 0.4,
+                roughness: 0.3
+            });
+            const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+            screen.position.y = 4.5;
+            screen.castShadow = true;
+            billboardGroup.add(screen);
+
+            // Frame
+            const frameGeometry = new THREE.BoxGeometry(5.3, 4.3, 0.2);
+            const frameMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x0a0a0a,
+                metalness: 0.95,
+                roughness: 0.1
+            });
+            const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+            frame.position.set(0, 4.5, -0.25);
+            billboardGroup.add(frame);
+
+            // Text canvas with better resolution
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1536;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#ffffff');
+            gradient.addColorStop(1, '#f5f5f5');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = 'bold 140px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(data.title, canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            const textMaterial = new THREE.MeshBasicMaterial({ map: texture });
+            const textPlane = new THREE.Mesh(
+                new THREE.PlaneGeometry(4.8, 3.8),
+                textMaterial
+            );
+            textPlane.position.set(0, 4.5, 0.16);
+            billboardGroup.add(textPlane);
+
+            // Animated glow effect
+            const glowGeometry = new THREE.PlaneGeometry(6, 5);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: data.color,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(0, 4.5, -0.4);
+            billboardGroup.add(glow);
+
+            // Spotlight for each billboard
+            const spotlight = new THREE.SpotLight(data.color, 2, 20, Math.PI / 6, 0.5);
+            spotlight.position.set(0, 10, 0);
+            spotlight.target = screen;
+            spotlight.castShadow = true;
+            billboardGroup.add(spotlight);
+
+            billboardGroup.position.set(data.position.x, 0, data.position.z);
+            billboardGroup.userData = { 
+                content: data.content, 
+                index, 
+                glow,
+                spotlight,
+                originalEmissive: 0.6
+            };
+            
+            scene.add(billboardGroup);
+            billboards.push(billboardGroup);
+        });
+
+        // ============================================
+        // ORBIT CONTROLS
+        // ============================================
+        let isOrbitMode = false;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let orbitRotation = { theta: 0, phi: Math.PI / 3.5 };
+        let orbitDistance = 25;
+        let orbitTarget = new THREE.Vector3(0, 2, -25);
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            if (isOrbitMode) {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (isOrbitMode && isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                orbitRotation.theta -= deltaX * 0.006;
+                orbitRotation.phi -= deltaY * 0.006;
+                orbitRotation.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbitRotation.phi));
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        renderer.domElement.addEventListener('wheel', (e) => {
+            if (isOrbitMode) {
+                e.preventDefault();
+                orbitDistance += e.deltaY * 0.03;
+                orbitDistance = Math.max(8, Math.min(80, orbitDistance));
+            }
+        });
+
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.getAttribute('data-mode');
+                viewButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                isOrbitMode = mode === 'orbit';
+                
+                if (isOrbitMode) {
+                    orbitTarget.copy(characterGroup.position);
+                }
+            });
+        });
+
+        // ============================================
+        // CHARACTER MOVEMENT
+        // ============================================
+        const keys = {};
+        const moveSpeed = 0.22;
+        const rotateSpeed = 0.04;
+        const clock = new THREE.Clock();
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        const mobileControls = document.querySelectorAll('.control-btn');
+        mobileControls.forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[btn.getAttribute('data-key')] = true;
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[btn.getAttribute('data-key')] = false;
+            });
+        });
+
+        function updateCharacterMovement() {
+            if (isOrbitMode) return;
+
+            let isMoving = false;
+
+            if (keys['a'] || keys['arrowleft']) {
+                characterGroup.rotation.y += rotateSpeed;
+            }
+            if (keys['d'] || keys['arrowright']) {
+                characterGroup.rotation.y -= rotateSpeed;
+            }
+
+            const direction = new THREE.Vector3();
+            if (keys['w'] || keys['arrowup']) {
+                direction.z = -1;
+                isMoving = true;
+            }
+            if (keys['s'] || keys['arrowdown']) {
+                direction.z = 1;
+                isMoving = true;
+            }
+
+            if (direction.length() > 0) {
+                direction.applyEuler(characterGroup.rotation);
+                characterGroup.position.add(direction.multiplyScalar(moveSpeed));
+            }
+
+            // Update animation
+            if (characterMixer && walkAction) {
+                if (isMoving) {
+                    if (!walkAction.isRunning()) walkAction.play();
+                    walkAction.timeScale = 1.2;
+                } else {
+                    walkAction.timeScale = 0;
+                }
+            }
+
+            characterGroup.position.x = Math.max(-90, Math.min(90, characterGroup.position.x));
+            characterGroup.position.z = Math.max(-90, Math.min(90, characterGroup.position.z));
+        }
+
+        // ============================================
+        // CAMERA CONTROL
+        // ============================================
+        function updateCamera() {
+            if (isOrbitMode) {
+                const x = orbitTarget.x + orbitDistance * Math.sin(orbitRotation.phi) * Math.cos(orbitRotation.theta);
+                const y = orbitTarget.y + orbitDistance * Math.cos(orbitRotation.phi);
+                const z = orbitTarget.z + orbitDistance * Math.sin(orbitRotation.phi) * Math.sin(orbitRotation.theta);
+                
+                camera.position.set(x, y, z);
+                camera.lookAt(orbitTarget);
+            } else {
+                const cameraOffset = new THREE.Vector3(0, 4.5, 8);
+                cameraOffset.applyEuler(characterGroup.rotation);
+                
+                camera.position.x = characterGroup.position.x + cameraOffset.x;
+                camera.position.y = characterGroup.position.y + cameraOffset.y;
+                camera.position.z = characterGroup.position.z + cameraOffset.z;
+                
+                camera.lookAt(
+                    characterGroup.position.x, 
+                    characterGroup.position.y + 2, 
+                    characterGroup.position.z
+                );
+            }
+        }
+
+        // ============================================
+        // DAY/NIGHT CYCLE
+        // ============================================
+        let isNightMode = false;
+
+        document.getElementById('toggle-time').addEventListener('click', function() {
+            isNightMode = !isNightMode;
+            
+            if (isNightMode) {
+                this.textContent = '☀️ Day Mode';
+                this.classList.add('night');
+                animateSceneToNight();
+            } else {
+                this.textContent = '🌙 Night Mode';
+                this.classList.remove('night');
+                animateSceneToDay();
+            }
+        });
+
+        function animateSceneToNight() {
+            const nightSkyColor = 0x0a0a1a;
+            const nightGroundColor = 0x0a150a;
+            
+            new TWEEN.Tween(scene.background)
+                .to(new THREE.Color(nightSkyColor), 2500)
+                .onUpdate(() => scene.fog.color.copy(scene.background))
+                .start();
+            
+            new TWEEN.Tween(groundMaterial.color)
+                .to(new THREE.Color(nightGroundColor), 2500)
+                .start();
+            
+            new TWEEN.Tween(lights.sun)
+                .to({ intensity: 0 }, 2500)
+                .start();
+            
+            new TWEEN.Tween(lights.moon)
+                .to({ intensity: 0.5 }, 2500)
+                .start();
+            
+            new TWEEN.Tween(lights.ambient)
+                .to({ intensity: 0.2 }, 2500)
+                .start();
+            
+            new TWEEN.Tween(starsMaterial)
+                .to({ opacity: 1 }, 2500)
+                .start();
+
+            // Enhance billboard glow at night
+            billboards.forEach(billboard => {
+                const glow = billboard.userData.glow;
+                const spotlight = billboard.userData.spotlight;
+                if (glow) {
+                    new TWEEN.Tween(glow.material)
+                        .to({ opacity: 0.4 }, 2500)
+                        .start();
+                }
+                if (spotlight) {
+                    new TWEEN.Tween(spotlight)
+                        .to({ intensity: 4 }, 2500)
+                        .start();
+                }
+            });
+
+            // Brighten point lights
+            lights.pointLights.forEach(light => {
+                new TWEEN.Tween(light)
+                    .to({ intensity: 2 }, 2500)
+                    .start();
+            });
+        }
+
+        function animateSceneToDay() {
+            const daySkyColor = 0x87ceeb;
+            const dayGroundColor = 0x3a7a3a;
+            
+            new TWEEN.Tween(scene.background)
+                .to(new THREE.Color(daySkyColor), 2500)
+                .onUpdate(() => scene.fog.color.copy(scene.background))
+                .start();
+            
+            new TWEEN.Tween(groundMaterial.color)
+                .to(new THREE.Color(dayGroundColor), 2500)
+                .start();
+            
+            new TWEEN.Tween(lights.sun)
+                .to({ intensity: 1.5 }, 2500)
+                .start();
+            
+            new TWEEN.Tween(lights.moon)
+                .to({ intensity: 0 }, 2500)
+                .start();
+            
+            new TWEEN.Tween(lights.ambient)
+                .to({ intensity: 0.6 }, 2500)
+                .start();
+            
+            new TWEEN.Tween(starsMaterial)
+                .to({ opacity: 0 }, 2500)
+                .start();
+
+            billboards.forEach(billboard => {
+                const glow = billboard.userData.glow;
+                const spotlight = billboard.userData.spotlight;
+                if (glow) {
+                    new TWEEN.Tween(glow.material)
+                        .to({ opacity: 0.15 }, 2500)
+                        .start();
+                }
+                if (spotlight) {
+                    new TWEEN.Tween(spotlight)
+                        .to({ intensity: 2 }, 2500)
+                        .start();
+                }
+            });
+
+            lights.pointLights.forEach(light => {
+                new TWEEN.Tween(light)
+                    .to({ intensity: 1 }, 2500)
+                    .start();
+            });
+        }
+
+        // ============================================
+        // TWEEN SYSTEM
+        // ============================================
+        class TWEEN {
+            static tweens = [];
+            
+            static Tween = class {
+                constructor(object) {
+                    this.object = object;
+                    this.startValues = {};
+                    this.endValues = {};
+                    this.duration = 1000;
+                    this.elapsed = 0;
+                    this.onUpdateCallback = null;
+                    this.onCompleteCallback = null;
+                }
+                
+                to(properties, duration) {
+                    this.endValues = properties;
+                    this.duration = duration;
+                    return this;
+                }
+                
+                onUpdate(callback) {
+                    this.onUpdateCallback = callback;
+                    return this;
+                }
+                
+                onComplete(callback) {
+                    this.onCompleteCallback = callback;
+                    return this;
+                }
+                
+                start() {
+                    this.elapsed = 0;
+                    for (let prop in this.endValues) {
+                        if (this.object[prop] instanceof THREE.Color) {
+                            this.startValues[prop] = this.object[prop].clone();
+                        } else {
+                            this.startValues[prop] = this.object[prop];
+                        }
+                    }
+                    TWEEN.tweens.push(this);
+                    return this;
+                }
+                
+                update(delta) {
+                    this.elapsed += delta;
+                    const progress = Math.min(this.elapsed / this.duration, 1);
+                    
+                    for (let prop in this.endValues) {
+                        if (this.object[prop] instanceof THREE.Color) {
+                            this.object[prop].lerpColors(
+                                this.startValues[prop],
+                                this.endValues[prop],
+                                progress
+                            );
+                        } else {
+                            this.object[prop] = this.startValues[prop] + 
+                                (this.endValues[prop] - this.startValues[prop]) * progress;
+                        }
+                    }
+                    
+                    if (this.onUpdateCallback) this.onUpdateCallback();
+                    
+                    if (progress === 1) {
+                        if (this.onCompleteCallback) this.onCompleteCallback();
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            
+            static update(delta) {
+                TWEEN.tweens = TWEEN.tweens.filter(tween => !tween.update(delta));
+            }
+        }
+
+        // ============================================
+        // ENHANCED MUSIC SYSTEM
+        // ============================================
+        let audioContext = null;
+        let musicPlaying = false;
+        let oscillators = [];
+        let gainNodes = [];
+
+        document.getElementById('toggle-music').addEventListener('click', function() {
+            if (!musicPlaying) {
+                startMusic();
+                document.getElementById('music-icon').textContent = '🔊';
+                document.getElementById('music-text').textContent = 'Stop Ambience';
+                musicPlaying = true;
+            } else {
+                stopMusic();
+                document.getElementById('music-icon').textContent = '🔇';
+                document.getElementById('music-text').textContent = 'Play Ambience';
+                musicPlaying = false;
+            }
+        });
+
+        function startMusic() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+            const harmony = [130.81, 146.83, 164.81, 174.61, 196.00, 220.00, 246.94, 261.63];
+            const bass = [65.41, 73.42, 82.41, 87.31, 98.00, 110.00, 123.47, 130.81];
+            let noteIndex = 0;
+            
+            function playChord() {
+                if (!musicPlaying) return;
+                
+                oscillators.forEach(osc => {
+                    try { osc.stop(); } catch (e) {}
+                });
+                oscillators = [];
+                gainNodes = [];
+                
+                // Melody
+                const melodyOsc = audioContext.createOscillator();
+                const melodyGain = audioContext.createGain();
+                melodyOsc.connect(melodyGain);
+                melodyGain.connect(audioContext.destination);
+                melodyOsc.frequency.value = scale[noteIndex];
+                melodyOsc.type = 'sine';
+                melodyGain.gain.setValueAtTime(0, audioContext.currentTime);
+                melodyGain.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.1);
+                melodyGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+                melodyOsc.start(audioContext.currentTime);
+                melodyOsc.stop(audioContext.currentTime + 1.2);
+                oscillators.push(melodyOsc);
+                
+                // Harmony
+                const harmonyOsc = audioContext.createOscillator();
+                const harmonyGain = audioContext.createGain();
+                harmonyOsc.connect(harmonyGain);
+                harmonyGain.connect(audioContext.destination);
+                harmonyOsc.frequency.value = harmony[noteIndex];
+                harmonyOsc.type = 'triangle';
+                harmonyGain.gain.setValueAtTime(0, audioContext.currentTime);
+                harmonyGain.gain.linearRampToValueAtTime(0.03, audioContext.currentTime + 0.1);
+                harmonyGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+                harmonyOsc.start(audioContext.currentTime);
+                harmonyOsc.stop(audioContext.currentTime + 1.2);
+                oscillators.push(harmonyOsc);
+                
+                // Bass
+                const bassOsc = audioContext.createOscillator();
+                const bassGain = audioContext.createGain();
+                bassOsc.connect(bassGain);
+                bassGain.connect(audioContext.destination);
+                bassOsc.frequency.value = bass[noteIndex];
+                bassOsc.type = 'sawtooth';
+                bassGain.gain.setValueAtTime(0, audioContext.currentTime);
+                bassGain.gain.linearRampToValueAtTime(0.02, audioContext.currentTime + 0.1);
+                bassGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+                bassOsc.start(audioContext.currentTime);
+                bassOsc.stop(audioContext.currentTime + 1.2);
+                oscillators.push(bassOsc);
+                
+                noteIndex = (noteIndex + 1) % scale.length;
+                setTimeout(playChord, 700);
+            }
+            
+            playChord();
+        }
+
+        function stopMusic() {
+            oscillators.forEach(osc => {
+                try { osc.stop(); } catch (e) {}
+            });
+            oscillators = [];
+            gainNodes = [];
+            
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+            }
+        }
+
+        // ============================================
+        // BILLBOARD INTERACTION
+        // ============================================
+        let nearestBillboard = null;
+
+        function checkBillboardProximity() {
+            if (isOrbitMode) {
+                document.getElementById('interaction-prompt').style.display = 'none';
+                return;
+            }
+
+            let closest = null;
+            let minDistance = Infinity;
+
+            billboards.forEach(billboard => {
+                const distance = characterGroup.position.distanceTo(billboard.position);
+                if (distance < 8 && distance < minDistance) {
+                    minDistance = distance;
+                    closest = billboard;
+                }
+            });
+
+            // Highlight nearest billboard
+            billboards.forEach(billboard => {
+                const screen = billboard.children.find(child => 
+                    child.geometry && child.geometry.type === 'BoxGeometry' && child.material.emissive
+                );
+                if (screen) {
+                    if (billboard === closest) {
+                        billboard.userData.targetEmissive = 1.2;
+                    } else {
+                        billboard.userData.targetEmissive = billboard.userData.originalEmissive;
+                    }
+                }
+            });
+
+            nearestBillboard = closest;
+            const prompt = document.getElementById('interaction-prompt');
+            
+            if (nearestBillboard) {
+                prompt.style.display = 'block';
+            } else {
+                prompt.style.display = 'none';
+            }
+        }
+
+        // Smooth emissive transitions
+        function updateBillboardEffects() {
+            billboards.forEach(billboard => {
+                const screen = billboard.children.find(child => 
+                    child.geometry && child.geometry.type === 'BoxGeometry' && child.material.emissive
+                );
+                if (screen && billboard.userData.targetEmissive !== undefined) {
+                    screen.material.emissiveIntensity += 
+                        (billboard.userData.targetEmissive - screen.material.emissiveIntensity) * 0.1;
+                }
+            });
+        }
+
+        document.getElementById('interaction-prompt').addEventListener('click', () => {
+            if (nearestBillboard) {
+                openBillboard(nearestBillboard.userData.content);
+            }
+        });
+
+        renderer.domElement.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(billboards, true);
+
+            if (intersects.length > 0) {
+                let billboard = intersects[0].object;
+                while (billboard.parent && !billboard.userData.content) {
+                    billboard = billboard.parent;
+                }
+                if (billboard.userData.content) {
+                    openBillboard(billboard.userData.content);
+                }
+            }
+        });
+
+        function openBillboard(content) {
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('billboard-modal').classList.add('active');
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('billboard-modal').classList.remove('active');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('billboard-modal').classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // UI CONTROLS
+        // ============================================
+        document.getElementById('toggle-instructions').addEventListener('click', function() {
+            const content = document.getElementById('instruction-content');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                this.textContent = 'Hide';
+            } else {
+                content.style.display = 'none';
+                this.textContent = 'Show';
+            }
+        });
+
+        // ============================================
+        // MINIMAP
+        // ============================================
+        const minimapCanvas = document.getElementById('minimap');
+        const minimapCtx = minimapCanvas.getContext('2d');
+        minimapCanvas.width = 240;
+        minimapCanvas.height = 240;
+
+        function drawMinimap() {
+            minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.95)';
+            minimapCtx.fillRect(0, 0, 240, 240);
+            
+            // Grid
+            minimapCtx.strokeStyle = 'rgba(76, 175, 80, 0.2)';
+            minimapCtx.lineWidth = 1;
+            for (let i = 0; i <= 240; i += 24) {
+                minimapCtx.beginPath();
+                minimapCtx.moveTo(i, 0);
+                minimapCtx.lineTo(i, 240);
+                minimapCtx.stroke();
+                minimapCtx.beginPath();
+                minimapCtx.moveTo(0, i);
+                minimapCtx.lineTo(240, i);
+                minimapCtx.stroke();
+            }
+            
+            // Billboards
+            billboards.forEach(billboard => {
+                const x = ((billboard.position.x + 100) / 200) * 240;
+                const z = ((billboard.position.z + 100) / 200) * 240;
+                minimapCtx.fillStyle = '#FF9800';
+                minimapCtx.beginPath();
+                minimapCtx.arc(x, z, 5, 0, Math.PI * 2);
+                minimapCtx.fill();
+            });
+            
+            // Character
+            const charX = ((characterGroup.position.x + 100) / 200) * 240;
+            const charZ = ((characterGroup.position.z + 100) / 200) * 240;
+            
+            // Glow effect
+            const gradient = minimapCtx.createRadialGradient(charX, charZ, 0, charX, charZ, 12);
+            gradient.addColorStop(0, 'rgba(76, 175, 80, 0.8)');
+            gradient.addColorStop(1, 'rgba(76, 175, 80, 0)');
+            minimapCtx.fillStyle = gradient;
+            minimapCtx.beginPath();
+            minimapCtx.arc(charX, charZ, 12, 0, Math.PI * 2);
+            minimapCtx.fill();
+            
+            // Character dot
+            minimapCtx.fillStyle = '#4CAF50';
+            minimapCtx.beginPath();
+            minimapCtx.arc(charX, charZ, 6, 0, Math.PI * 2);
+            minimapCtx.fill();
+            
+            // Direction indicator
+            minimapCtx.strokeStyle = '#ffffff';
+            minimapCtx.lineWidth = 3;
+            minimapCtx.beginPath();
+            minimapCtx.moveTo(charX, charZ);
+            minimapCtx.lineTo(
+                charX + Math.sin(-characterGroup.rotation.y) * 15,
+                charZ + Math.cos(-characterGroup.rotation.y) * 15
+            );
+            minimapCtx.stroke();
+        }
+
+        // ============================================
+        // FPS & STATS
+        // ============================================
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsUpdate = Date.now();
+
+        function updateStats() {
+            frameCount++;
+            const now = Date.now();
+            if (now - lastFpsUpdate >= 1000) {
+                fps = frameCount;
+                document.getElementById('fps-value').textContent = fps;
+                frameCount = 0;
+                lastFpsUpdate = now;
+            }
+            
+            // Update object count
+            let objectCount = 0;
+            scene.traverse(() => objectCount++);
+            document.getElementById('objects-value').textContent = objectCount;
+        }
+
+        // ============================================
+        // ANIMATION LOOP
+        // ============================================
+        let lastTime = Date.now();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const currentTime = Date.now();
+            const delta = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            const clockDelta = clock.getDelta();
+            
+            // Update character animation
+            if (characterMixer) {
+                characterMixer.update(clockDelta);
+            }
+            
+            updateCharacterMovement();
+            updateCamera();
+            checkBillboardProximity();
+            updateBillboardEffects();
+            drawMinimap();
+            updateParticles();
+            updateStats();
+            TWEEN.update(delta);
+            
+            // Animate clouds
+            clouds.forEach((cloud, index) => {
+                cloud.position.x += Math.sin(currentTime * 0.0001 + index) * 0.015;
+                cloud.rotation.y += 0.0003;
+            });
+            
+            // Update LODs
+            camera.updateMatrixWorld();
+            scene.traverse((object) => {
+                if (object.isLOD) {
+                    object.update(camera);
+                }
+            });
+            
+            // Subtle camera shake when moving
+            if (keys['w'] || keys['arrowup'] || keys['s'] || keys['arrowdown']) {
+                camera.position.y += Math.sin(currentTime * 0.01) * 0.02;
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // ============================================
+        // WINDOW RESIZE
+        // ============================================
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ============================================
+        // START
+        // ============================================
+        animate();
+
+    </script>
 </body>
 </html>
